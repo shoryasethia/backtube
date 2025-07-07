@@ -1,0 +1,19 @@
+{
+  "name": "backtube",
+  "version": "1.0.0",
+  "description": "Backend for youtube inspired platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "javascript",
+    "node",
+    "backend",
+    "express",
+    "mongodb",
+    "mongoose"
+  ],
+  "author": "Shorya Sethia",
+  "license": "ISC"
+}
