@@ -1,0 +1,9 @@
+/.vscode
+/node_modules
+./dist
+README.md
+package-lock.json
+
+*.env
+.env
+.env*

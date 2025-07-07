@@ -19,6 +19,7 @@
   "author": "Shorya Sethia",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2"
   }
 }
