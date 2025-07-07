@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "Backend for youtube inspired platform",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm index.js",
+    "dev": "nodemon src/index.js "
   },
   "keywords": [
     "javascript",
@@ -15,5 +17,8 @@
     "mongoose"
   ],
   "author": "Shorya Sethia",
-  "license": "ISC"
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
 }
