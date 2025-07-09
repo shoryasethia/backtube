@@ -28,7 +28,7 @@ cp .env.example .env
 Then update the values in `.env` with your actual credentials:
 - MongoDB connection string
 - JWT secrets (generate secure random strings)
-- Cloudinary credentials for image uploads
+- Cloudinary credentials for image/video uploads
 
 ### Starting the Development Server
 ```bash
@@ -41,7 +41,10 @@ npm start
 
 The server will start on `http://localhost:8000`
 
-## Authentication Flow Diagram
+## Flow Diagrams
+
+<details>
+<summary>Authentication</summary>
 
 ```mermaid
 flowchart TD
@@ -125,6 +128,84 @@ flowchart TD
     class B,E,H,K,Q,T,W,FF,GG,LL,PP,VV,BBB decisionBox
 ```
 
+</details>
+
+<details>
+<summary>Refresh Access Token</summary>
+
+```mermaid
+flowchart TD
+    A[Client Request] --> B[POST /api/v1/users/refresh-token]
+    B --> C[Extract Refresh Token]
+    C --> D{Token Source?}
+    
+    %% Token extraction
+    D -->|From Cookie| E[req.cookies.refreshToken]
+    D -->|From Body| F[req.body.refreshToken]
+    E --> G[incomingRefreshToken]
+    F --> G
+    
+    %% Validation
+    G --> H{Token Present?}
+    H -->|No| I[Return 401<br/>Unauthorized request]
+    H -->|Yes| J[Verify JWT Signature]
+    
+    %% JWT Verification
+    J --> K{Valid JWT?}
+    K -->|No| L[JWT Error<br/>Invalid/Malformed]
+    K -->|Yes| M[Decode Token Payload]
+    
+    %% User Validation
+    M --> N[Extract User ID<br/>from decoded token]
+    N --> O[Find User in Database<br/>User.findById]
+    O --> P{User Exists?}
+    P -->|No| Q[Return 401<br/>Invalid Refresh token]
+    P -->|Yes| R[Compare Tokens]
+    
+    %% Token Comparison
+    R --> S{incomingRefreshToken === user.refreshToken?}
+    S -->|No| T[Return 401<br/>Token expired or used]
+    S -->|Yes| U[Generate New Tokens]
+    
+    %% Token Generation
+    U --> V[generateAccessAndRefreshTokens<br/>user._id]
+    V --> W[Create New Access Token<br/>expires: 1d]
+    W --> X[Create New Refresh Token<br/>expires: 10d]
+    X --> Y[Save New Refresh Token<br/>to Database]
+    
+    %% Response
+    Y --> Z[Set Cookie Options<br/>httpOnly: true, secure: true]
+    Z --> AA[Set accessToken Cookie]
+    AA --> BB[Set refreshToken Cookie]
+    BB --> CC[Return Response<br/>200 + New Tokens]
+    
+    %% Error Handling
+    J --> DD{JWT Error Type?}
+    DD -->|TokenExpiredError| EE[Return 401<br/>jwt expired]
+    DD -->|JsonWebTokenError| FF[Return 401<br/>Invalid token]
+    DD -->|Other Error| GG[Return 401<br/>Error message]
+    
+    L --> HH[Return 401<br/>Invalid refresh token]
+    EE --> HH
+    FF --> HH
+    GG --> HH
+    
+    %% Styling
+    classDef errorBox fill:#ffebee,stroke:#f44336,color:#000
+    classDef successBox fill:#e8f5e8,stroke:#4caf50,color:#000
+    classDef processBox fill:#e3f2fd,stroke:#2196f3,color:#000
+    classDef decisionBox fill:#fff3e0,stroke:#ff9800,color:#000
+    classDef tokenBox fill:#f3e5f5,stroke:#9c27b0,color:#000
+    
+    class I,Q,T,EE,FF,GG,HH,L errorBox
+    class CC successBox
+    class B,C,E,F,G,J,M,N,O,R,U,V,W,X,Y,Z,AA,BB processBox
+    class D,H,K,P,S,DD decisionBox
+    class incomingRefreshToken,accessToken,refreshToken tokenBox
+```
+
+</details>
+
 ## Database Schema / Data Model
 
 ![Data Model](src/data-model/data-model.png)
@@ -150,3 +231,4 @@ Make sure to set this environment variable in your Postman environment before te
 - `POST /api/v1/users/register` - Register a new user with avatar and optional cover image
 - `POST /api/v1/users/login` - User login with username/email and password
 - `POST /api/v1/users/logout` - User logout (requires authentication)
+- `POST /api/v1/users/refresh-token` - Refresh access token using refresh token
