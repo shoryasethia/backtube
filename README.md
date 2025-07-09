@@ -40,6 +40,90 @@ npm start
 
 The server will start on `http://localhost:8000`
 
+## Authentication Flow Diagram
+
+```mermaid
+flowchart TD
+    A[User Starts] --> B{Action?}
+    
+    %% Registration Flow
+    B -->|Register| C[POST /api/v1/users/register]
+    C --> D[Validate Required Fields]
+    D --> E{Valid Data?}
+    E -->|No| F[Return 400 Error]
+    E -->|Yes| G[Check User Exists]
+    G --> H{User Exists?}
+    H -->|Yes| I[Return 409 Conflict]
+    H -->|No| J[Upload Avatar to Cloudinary]
+    J --> K{Avatar Upload Success?}
+    K -->|No| L[Return 400 Error]
+    K -->|Yes| M[Create User in DB]
+    M --> N[Return User Data<br/>No Tokens Yet]
+    
+    %% Login Flow
+    B -->|Login| O[POST /api/v1/users/login]
+    O --> P[Extract username/email + password]
+    P --> Q{Required Fields Present?}
+    Q -->|No| R[Return 400 Error]
+    Q -->|Yes| S[Find User in DB]
+    S --> T{User Found?}
+    T -->|No| U[Return 404 Error]
+    T -->|Yes| V[Verify Password]
+    V --> W{Password Valid?}
+    W -->|No| X[Return 401 Error]
+    W -->|Yes| Y[Generate Access Token<br/>expires: 1d]
+    Y --> Z[Generate Refresh Token<br/>expires: 10d]
+    Z --> AA[Save Refresh Token to DB]
+    AA --> BB[Set HTTP-Only Cookies<br/>accessToken + refreshToken]
+    BB --> CC[Return Success Response<br/>+ User Data + Tokens]
+    
+    %% Protected Route Access
+    B -->|Access Protected Route| DD[Any Protected Endpoint]
+    DD --> EE[Auth Middleware: verifyJWT]
+    EE --> FF{Access Token in Cookie?}
+    FF -->|No| GG{Token in Authorization Header?}
+    GG -->|No| HH[Return 401 Unauthorized]
+    GG -->|Yes| II[Extract Bearer Token]
+    FF -->|Yes| JJ[Extract Cookie Token]
+    II --> KK[Verify JWT Signature]
+    JJ --> KK
+    KK --> LL{Token Valid & Not Expired?}
+    LL -->|No| MM[Return 401 Invalid Token]
+    LL -->|Yes| NN[Decode User ID from Token]
+    NN --> OO[Find User in DB]
+    OO --> PP{User Found?}
+    PP -->|No| QQ[Return 401 Invalid Token]
+    PP -->|Yes| RR[Add User to req.user]
+    RR --> SS[Continue to Protected Route]
+    
+    %% Logout Flow
+    B -->|Logout| TT[POST /api/v1/users/logout]
+    TT --> UU[Auth Middleware: verifyJWT]
+    UU --> VV{Authentication Success?}
+    VV -->|No| WW[Return 401 Unauthorized]
+    VV -->|Yes| XX[Remove Refresh Token from DB<br/>$unset: refreshToken]
+    XX --> YY[Clear accessToken Cookie]
+    YY --> ZZ[Clear refreshToken Cookie]
+    ZZ --> AAA[Return Success Response]
+    
+    %% Token Expiry Scenarios
+    KK --> BBB{Token Expired?}
+    BBB -->|Yes| CCC[JWT Library Throws<br/>TokenExpiredError]
+    CCC --> DDD[Return 401 jwt expired]
+    BBB -->|No| LL
+    
+    %% Styling
+    classDef errorBox fill:#ffebee,stroke:#f44336,color:#000
+    classDef successBox fill:#e8f5e8,stroke:#4caf50,color:#000
+    classDef processBox fill:#e3f2fd,stroke:#2196f3,color:#000
+    classDef decisionBox fill:#fff3e0,stroke:#ff9800,color:#000
+    
+    class F,I,L,R,U,X,HH,MM,QQ,WW,DDD errorBox
+    class N,CC,SS,AAA successBox
+    class C,D,G,J,M,O,P,S,V,Y,Z,AA,BB,DD,EE,II,JJ,KK,NN,OO,RR,TT,UU,XX,YY,ZZ processBox
+    class B,E,H,K,Q,T,W,FF,GG,LL,PP,VV,BBB decisionBox
+```
+
 ## Database Schema / Data Model
 
 ![Data Model](src/data-model/data-model.png)
