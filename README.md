@@ -5,7 +5,7 @@
 ### Prerequisites
 - Node.js (v14 or higher)
 - MongoDB Atlas account or local MongoDB installation
-- Cloudinary account for image uploads
+- Cloudinary account for image/video uploads
 
 ### Installation
 ```bash
@@ -14,8 +14,9 @@ git clone https://github.com/shoryasethia/backtube.git
 cd backtube
 ```
 # Install dependencies
+```
 npm install
-
+```
 ### Environment Variables
 Create a `.env` file in the root directory and add your environment variables. 
 
