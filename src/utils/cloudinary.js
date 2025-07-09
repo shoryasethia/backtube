@@ -16,11 +16,12 @@ const uploadOnCloudinary = async (localFilePath) => {
             quality: "auto",
             fetch_format: "auto"
         });
-        
-        console.log(`File uploaded SUCCESSFULLY :: Public url: ${uploadResult.secure_url}`);
-        
+
+        if (fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath);
+        }
         return uploadResult;
-        
+
     } catch (error) {
         console.error(`Error uploading ${localFilePath}: `, error);
         
