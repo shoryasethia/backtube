@@ -208,7 +208,12 @@ flowchart TD
 
 ## Database Schema / Data Model
 
+<details>
+<summary>Database Schema Diagram</summary>
+
 ![Data Model](src/data-model/data-model.png)
+
+</details>
 
 ## API Testing
 
