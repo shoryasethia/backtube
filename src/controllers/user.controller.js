@@ -78,4 +78,24 @@ const registerUser = asyncHandler(async (req,res) => {
 
 })
 
-export {registerUser}
+const loginUser = asyncHandler( async (req,res) => {
+  // get details from user from req.body
+  // check if user exists via username or email, if not raise error
+  // if exist, check password, if mismatch raise error
+  // update the refresh token and its expiry.
+  // send response to user as well (cookie)
+
+  const {username, email, password} = req.body()
+
+  if(!username && !email){
+    throw new ApiError(400, `Username or email is required`)
+  }
+
+
+
+})
+
+export {
+  registerUser, 
+  loginUser
+}
