@@ -204,7 +204,7 @@ const refreshAccessToken = asyncHandler (async (req,res) => {
       secure: true
     }
   
-    const { newAccessToken, newRefreshToken} = await generateAccessAndRefreshTokens(decodedRefreshToken._id)
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken} = await generateAccessAndRefreshTokens(decodedRefreshToken._id)
   
     return res
     .status(200)
