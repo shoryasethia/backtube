@@ -206,6 +206,99 @@ flowchart TD
 
 </details>
 
+<details>
+<summary>User Profile Updates</summary>
+
+```mermaid
+flowchart TD
+    A[User Profile Update Request] --> B{Update Type?}
+    
+    %% Change Password Flow
+    B -->|Change Password| C[POST /api/v1/users/change-password]
+    C --> D[Auth Middleware: verifyJWT]
+    D --> E{Authenticated?}
+    E -->|No| F[Return 401 Unauthorized]
+    E -->|Yes| G[Extract Form Data<br/>upload.none middleware]
+    G --> H[Get oldPassword, newPassword,<br/>confirmNewPassword from req.body]
+    H --> I{newPassword === confirmNewPassword?}
+    I -->|No| J[Return 400<br/>Passwords do not match]
+    I -->|Yes| K[Find User in DB<br/>req.user._id]
+    K --> L[Verify Old Password<br/>user.isPasswordCorrect]
+    L --> M{Old Password Valid?}
+    M -->|No| N[Return 400<br/>Invalid old password]
+    M -->|Yes| O[Update Password<br/>user.password = newPassword]
+    O --> P[Save User<br/>validateBeforeSave: false]
+    P --> Q[Return 200<br/>Password updated successfully]
+    
+    %% Get Current User Flow
+    B -->|Get Current User| R[GET /api/v1/users/current-user]
+    R --> S[Auth Middleware: verifyJWT]
+    S --> T{Authenticated?}
+    T -->|No| U[Return 401 Unauthorized]
+    T -->|Yes| V{req.user exists?}
+    V -->|No| W[Return 401<br/>User not found]
+    V -->|Yes| X[Return 200<br/>Current user data]
+    
+    %% Update Avatar Flow
+    B -->|Update Avatar| Y[POST /api/v1/users/change-avatar]
+    Y --> Z[Auth Middleware: verifyJWT]
+    Z --> AA{Authenticated?}
+    AA -->|No| BB[Return 401 Unauthorized]
+    AA -->|Yes| CC[Single Upload Middleware<br/>uploadSingleAvatar]
+    CC --> DD[Get File Path<br/>req.file.path]
+    DD --> EE{Avatar File Present?}
+    EE -->|No| FF[Return 400<br/>Avatar file missing]
+    EE -->|Yes| GG[Upload to Cloudinary<br/>uploadOnCloudinary]
+    GG --> HH{Upload Success?}
+    HH -->|No| II[Return 400<br/>Upload failed]
+    HH -->|Yes| JJ[Get Current User<br/>& Old Avatar URL]
+    JJ --> KK[Update User Avatar<br/>in Database]
+    KK --> LL{Old Avatar URL exists?}
+    LL -->|No| MM[Return Success Response<br/>deletionStatus: null]
+    LL -->|Yes| NN[Try Delete Old Avatar<br/>deleteFromCloudinary]
+    NN --> OO{Deletion Success?}
+    OO -->|Yes| PP[Return Success Response<br/>deletionStatus: success]
+    OO -->|No| QQ[Return Success Response<br/>deletionStatus: error message]
+    
+    %% Update Cover Image Flow
+    B -->|Update Cover Image| RR[POST /api/v1/users/change-cover-image]
+    RR --> SS[Auth Middleware: verifyJWT]
+    SS --> TT{Authenticated?}
+    TT -->|No| UU[Return 401 Unauthorized]
+    TT -->|Yes| VV[Single Upload Middleware<br/>uploadSingleCoverImage]
+    VV --> WW[Get File Path<br/>req.file.path]
+    WW --> XX{Cover Image File Present?}
+    XX -->|No| YY[Return 400<br/>Cover image file missing]
+    XX -->|Yes| ZZ[Upload to Cloudinary<br/>uploadOnCloudinary]
+    ZZ --> AAA{Upload Success?}
+    AAA -->|No| BBB[Return 400<br/>Upload failed]
+    AAA -->|Yes| CCC[Get Current User<br/>& Old Cover Image URL]
+    CCC --> DDD[Update User Cover Image<br/>in Database]
+    DDD --> EEE{Old Cover Image URL exists?}
+    EEE -->|No| FFF[Return Success Response<br/>deletionStatus: null]
+    EEE -->|Yes| GGG[Try Delete Old Cover Image<br/>deleteFromCloudinary]
+    GGG --> HHH{Deletion Success?}
+    HHH -->|Yes| III[Return Success Response<br/>deletionStatus: success]
+    HHH -->|No| JJJ[Return Success Response<br/>deletionStatus: error message]
+    
+    %% Styling
+    classDef errorBox fill:#ffebee,stroke:#f44336,color:#000
+    classDef successBox fill:#e8f5e8,stroke:#4caf50,color:#000
+    classDef processBox fill:#e3f2fd,stroke:#2196f3,color:#000
+    classDef decisionBox fill:#fff3e0,stroke:#ff9800,color:#000
+    classDef uploadBox fill:#f3e5f5,stroke:#9c27b0,color:#000
+    classDef authBox fill:#e1f5fe,stroke:#00acc1,color:#000
+    
+    class F,J,N,U,W,BB,FF,II,UU,YY,BBB errorBox
+    class Q,X,MM,PP,QQ,FFF,III,JJJ successBox
+    class C,D,G,H,K,L,O,P,R,S,Y,Z,CC,DD,GG,JJ,KK,RR,SS,VV,WW,ZZ,CCC,DDD processBox
+    class B,E,I,M,T,V,AA,EE,HH,LL,NN,OO,TT,XX,AAA,EEE,GGG,HHH decisionBox
+    class GG,ZZ,NN,GGG uploadBox
+    class D,S,Z,SS authBox
+```
+
+</details>
+
 ## Database Schema / Data Model
 
 <details>
@@ -237,3 +330,7 @@ Make sure to set this environment variable in your Postman environment before te
 - `POST /api/v1/users/login` - User login with username/email and password
 - `POST /api/v1/users/logout` - User logout (requires authentication)
 - `POST /api/v1/users/refresh-token` - Refresh access token using refresh token
+- `GET /api/v1/users/current-user` - Get current authenticated user data (requires authentication)
+- `POST /api/v1/users/change-password` - Change user password (requires authentication)
+- `POST /api/v1/users/change-avatar` - Update user avatar image (requires authentication)
+- `POST /api/v1/users/change-cover-image` - Update user cover image (requires authentication)
