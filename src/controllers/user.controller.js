@@ -1,7 +1,7 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from '../utils/ApiError.js'
 import { User } from "../models/user.models.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { 
   validateRequiredFields, 
@@ -305,7 +305,10 @@ const updateUserAvatar = asyncHandler (async (req,res) => {
     throw new ApiError(400, "Error while uploading avatar on cloudinary.")
   }
 
-  const updatedUser = await User.findOneAndUpdate(
+  const user = await User.findById(req.user?._id)
+  const oldAvatarUrl = user.avatar
+
+  const updatedUser = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -313,15 +316,28 @@ const updateUserAvatar = asyncHandler (async (req,res) => {
       }
     },
     {
-      new: false
+      new: true
     }
   ).select("-password -refreshToken")
+
+  let deletionMessage = null;
+  if(oldAvatarUrl) {
+    try {
+      await deleteFromCloudinary(oldAvatarUrl);
+      deletionMessage = "Old avatar deleted successfully from cloudinary";
+    } catch (deleteError) {
+      deletionMessage = `Failed to delete old avatar: ${deleteError.message}`;
+    }
+  }
 
   return res
   .status(200)
   .json(new ApiResponse(
     200,
-    updatedUser,
+    {
+      user: updatedUser,
+      deletionStatus: deletionMessage
+    },
     "Avatar updated successfully."
   ))
 })
@@ -339,7 +355,10 @@ const updateUserCoverImage = asyncHandler (async (req,res) => {
     throw new ApiError(400, "Error while uploading cover image on cloudinary.")
   }
 
-  const updatedUser = await User.findOneAndUpdate(
+  const user = await User.findById(req.user?._id)
+  const oldCoverImageUrl = user.coverImage
+
+  const updatedUser = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -347,18 +366,33 @@ const updateUserCoverImage = asyncHandler (async (req,res) => {
       }
     },
     {
-      new: false
+      new: true
     }
   ).select("-password -refreshToken")
+
+  let deletionMessage = null;
+  if (oldCoverImageUrl) {
+    try {
+      await deleteFromCloudinary(oldCoverImageUrl);
+      deletionMessage = "Old cover image deleted successfully from cloudinary";
+    } catch (deleteError) {
+      deletionMessage = `Failed to delete old cover image: ${deleteError.message}`;
+    }
+  }
 
   return res
   .status(200)
   .json(new ApiResponse(
     200,
-    updatedUser,
+    {
+      user: updatedUser,
+      deletionStatus: deletionMessage
+    },
     "Cover image updated successfully."
   ))
 })
+
+
 
 export {
   registerUser, 
