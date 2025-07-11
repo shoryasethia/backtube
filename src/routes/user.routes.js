@@ -7,8 +7,10 @@ import {
   changeCurrentUserPassword, 
   getCurrentUser, 
   updateUserAvatar,
-  updateUserCoverImage
+  updateUserCoverImage,
+  getUserChannelProfile
 } from "../controllers/user.controller.js";
+
 import { upload, uploadSingleAvatar, uploadSingleCoverImage } from '../middlewares/multer.middleware.js'
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -46,5 +48,8 @@ userRouter.route("/change-cover-image").post(
   uploadSingleCoverImage,
   updateUserCoverImage
 )
+
+userRouter.route("/channel/:username").get(getUserChannelProfile)
+
 
 export default userRouter
