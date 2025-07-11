@@ -332,7 +332,7 @@ Make sure to set this environment variable in your Postman environment before te
 - `POST /api/v1/users/refresh-token` - Refresh access token using refresh token
 - `GET /api/v1/users/current-user` - Get current authenticated user data (requires authentication)
 - `POST /api/v1/users/change-password` - Change user password (requires authentication)
-- `POST /api/v1/users/change-avatar` - Update user avatar image (requires authentication)
-- `POST /api/v1/users/change-cover-image` - Update user cover image (requires authentication)
+- `PATCH /api/v1/users/change-avatar` - Update user avatar image (requires authentication)
+- `PATCH /api/v1/users/change-cover` - Update user cover image (requires authentication)
 - `GET /api/v1/users/channel/:username` - Get user channel profile with subscriber count and subscription status (requires authentication)
 - `GET /api/v1/users/watch-history` - Get user's video watch history (requires authentication)
