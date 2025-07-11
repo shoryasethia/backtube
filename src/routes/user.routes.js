@@ -58,6 +58,6 @@ userRouter.route("/change-account-details").patch(
 )
 
 userRouter.route("/channel/:username").get(verifyJWT,getUserChannelProfile)
-userRouter.route("/watch-history").get(verifyJWT, getWatchHistory)
+userRouter.route("/history").get(verifyJWT, getWatchHistory)
 
 export default userRouter

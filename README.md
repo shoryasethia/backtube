@@ -336,4 +336,4 @@ Make sure to set this environment variable in your Postman environment before te
 - `PATCH /api/v1/users/change-cover` - Update user cover image (requires authentication)
 - `PATCH /api/v1/users/change-account-details` - Update user fullName and email (requires authentication)
 - `GET /api/v1/users/channel/:username` - Get user channel profile with subscriber count and subscription status (requires authentication)
-- `GET /api/v1/users/watch-history` - Get user's video watch history (requires authentication)
+- `GET /api/v1/users/history` - Get user's video watch history (requires authentication)
