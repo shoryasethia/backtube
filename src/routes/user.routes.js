@@ -41,13 +41,13 @@ userRouter.route("/change-password").post(verifyJWT, upload.none(), changeCurren
 userRouter.route("/current-user").get(verifyJWT,getCurrentUser)
 userRouter.route("/change-avatar").patch(
   verifyJWT,
-  uploadSingleAvatar,
+  upload.single("avatar"),
   updateUserAvatar
 )
 
 userRouter.route("/change-cover").patch(
   verifyJWT,
-  uploadSingleCoverImage,
+  upload.single("coverImage"),
   updateUserCoverImage
 )
 
