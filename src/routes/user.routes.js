@@ -8,7 +8,8 @@ import {
   getCurrentUser, 
   updateUserAvatar,
   updateUserCoverImage,
-  getUserChannelProfile
+  getUserChannelProfile,
+  getWatchHistory
 } from "../controllers/user.controller.js";
 
 import { upload, uploadSingleAvatar, uploadSingleCoverImage } from '../middlewares/multer.middleware.js'
@@ -49,7 +50,7 @@ userRouter.route("/change-cover-image").post(
   updateUserCoverImage
 )
 
-userRouter.route("/channel/:username").get(getUserChannelProfile)
-
+userRouter.route("/channel/:username").get(verifyJWT,getUserChannelProfile)
+userRouter.route("/watch-history").get(verifyJWT, getWatchHistory)
 
 export default userRouter
